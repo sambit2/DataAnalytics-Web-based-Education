@@ -1,5 +1,7 @@
 # DataAnalytics-Web-based-Education
+
 ## Part of my project for my master thesis at TU Delft (WIS Group) under the supervision of Prof. A. Bozzon
+## Also sincere acknowledgements to Prof. C. Hauff and Vassilis
 
 Contains the design of the tool in JS and the analysis of log files in R
 
