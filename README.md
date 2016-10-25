@@ -16,5 +16,5 @@ It contains the code that helps to extract the necessary components from the jso
 
 
 #### Part of my project for my master thesis at TU Delft (WIS Group) under the supervision of Prof. A. Bozzon
-Also sincere acknowledgements to Prof. C. Hauff and Vassilis
+#### Also sincere acknowledgements to Prof. C. Hauff and Vassilis
  
