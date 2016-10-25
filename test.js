@@ -24,3 +24,6 @@ $.getJSON('sessionevents.json', function(info){
    		   			 
    		    } 
    		 });
+console.log(events);
+console.log(time_raw);
+console.log(users);
