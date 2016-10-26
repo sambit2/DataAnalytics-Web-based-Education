@@ -27,3 +27,13 @@ $.getJSON('sessionevents.json', function(info){
 console.log(events);
 console.log(time_raw);
 console.log(users);
+setTimeout(function()
+{
+for(var j = 0; j < time_raw.length; j++){
+   date[j] = time_raw[j].substring(0,10);
+   time[j] = time_raw[j].substring(11,23);
+}
+if events = 
+}, 1000);
+console.log(date);
+console.log(time);
