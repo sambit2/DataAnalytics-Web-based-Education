@@ -1,6 +1,6 @@
 // Declare the arrays globally
 
-// Variables to store the event types, date and time, processed date and time and time in seconds
+// Variables to store the event types, raw time (with date), processed date and time and time in seconds
 
 var events = [];
 var time_raw = [];
@@ -11,6 +11,7 @@ var time_seconds = [];
 
 // These variables store the binary state of each user as a string for a certain time interval
 
+var exercise_check = [];
 var exercise = [];
 var connected = [];
 var focus = [];
@@ -23,7 +24,18 @@ var submitted = [];
 var students = [];
 var number = [];
 var category = [];
-var y = 0;
+
+var student_counter = 0;
+var p = 0;
+var date_index = [];
+var counter = 0;
+var student_index = 0;
+var annotation_index = 0;
+var annotated = [];
+var one_counter = 0;
+var two_counter = 0;
+var three_counter = 0;
+var z = 0;
 
 $.getJSON('sessionevents.json', function(info){
 
@@ -61,43 +73,93 @@ function process()
   // Convert time in seconds only
 
   time_seconds[k] = 3600*(parseInt(time[k].substring(0,2))) + 60*(parseInt(time[k].substring(3,5))) + parseFloat(time[k].substring(6,12));
-  // fix the index for time duration
+  
+  // Extract the dates to verify
+
   if(date[k] === "2016-01-04"){
+   date_index[p] = k;
+   p++;
+  }
+}
+
+  for(z = date_index[0]; z < (date_index[0] + date_index.length); z = counter){
    
    // Extract all students using ASQ in that time interval
 
-   if(time_seconds[k] <= (time_seconds[k] + 10.000)){
-      if (y === 0){
-      students[y] = users[k];
-      y++;  
+   student_counter = 0;
+   counter = z;
+   students[0] = users[counter];
+
+   while(time_seconds[counter] <= (time_seconds[z] + 10.00)){
+
+      if (student_counter === 0){
+      students[student_counter] = users[counter];
+      student_counter++;  
       }
-      if(y > 0){
+      if(student_counter > 0){
          for(var m = 0; m < students.length; m++){
-            if(users[k] === students[m]){
-                  continue;
-            }
-            else
+            if(users[counter] !== students[m]){
                if(m === (students.length-1)){
-                     students[y] = users[k];
-                     y++;
+                     students[student_counter] = users[counter];
+                     student_counter++;
+                  }
                      continue;
-               }
+            }
+            else{
+               break;
+            }    
          }
       }
 
+counter++;
    }
-}
+
+   // console.log(students);
+   
+   number = [];
+   category = [];
+   students.forEach(function(item) {
+    EventstoIndicators(students.indexOf(item), z, counter);
+});
+
+   IndicatorstoNumbers();
+   Categories();
+   Annotation(annotation_index);
+   annotation_index++;
+   students = [];
 }
 
 }
 
  // Converts the events to the six indicators
 
-  function EventstoIndicators()
+  function EventstoIndicators(index, start, end)
   {
-    for(var l = 0; l < time_raw.length; l++){
+   
+   // Initialize that user is not in an exercise
 
-      // To check for idle user
+   exercise[index] = "0";
+    
+    for(var l = start; l <= end; l++){
+
+      // To check if an exercise is activated
+
+      if(events[l] === "exercise-activated"){
+            exercise_check[index] = "1";
+        }
+      if(events[l] === "exercise-deactivated"){
+            exercise_check[index] = "0";
+        }
+      
+      if(users[l] === students[index]){
+
+         // To check if a user is in exercise
+
+         if(exercise_check[index] === "1"){
+            exercise[index] = "1";
+         }
+
+         // To check for idle user
 
         if(events[l] === "viewer-idle"){
          idle[index] = "1";
@@ -117,17 +179,6 @@ function process()
          connected[index] = "0";
          continue;
       }
-      
-      // To check if a user is in an exercise
-
-      if(events[l] === "exercise-activated"){
-            exercise[index] = "1";
-            continue;
-        }
-        if(events[l] === "exercise-deactivated"){
-         exercise[index] = "0";
-         continue;
-        }
 
         // To check for user focus
 
@@ -135,10 +186,11 @@ function process()
             focus[index] = "1";
             continue;
         }
-        /*if(events[l] === "windowblur" || events[l] === "exerciseblur"){
-         focus[index] = 0;
+
+        if(events[l] === "windowblur" || events[l] === "exerciseblur"){
+         focus[index] = "0";
          continue;
-        }*/
+        }
 
         // To check for user input
 
@@ -153,6 +205,7 @@ function process()
          submitted[index] = "1";
          continue;
         }
+      }
     }
   }
   
@@ -189,26 +242,40 @@ function process()
 
   }
 
+  // Annotate with Red, Yellow or Green as R, Y or G
 
+  function Annotation(s){
+   one_counter = 0;
+   two_counter = 0;
+   three_counter = 0;
+   for(var o = 0; o < students.length; o++){
+      if(category[o] === 1){
+         one_counter++;
+      }
+      if(category[o] === 2){
+         two_counter++;
+      }
+      if(category[o] === 3){
+         three_counter++;
+      }
+   }
+   if((one_counter/students.length) >= 0.7){
+      annotated[s] = "R";
+   }
+   if((one_counter/students.length) >= 0.4 && (one_counter/students.length) < 0.7){
+      annotated[s] = "Y";
+   }
+   annotated[s] = "G";
+  }
 
-students.forEach(function(item) {
-    console.log(students.indexOf(item));
-});
+console.log(annotated);
+
+//Use of settimeout
 
 /*setTimeout(function()
 {
-for(var j = 0; j < time_raw.length; j++){
-   date[j] = time_raw[j].substring(0,10);
-   time[j] = time_raw[j].substring(11,23);
-}
-}, 1000);*/
-/*for(var k = 0; k < time_raw.length; k++){
-   // Convert time in seconds only
-
- if (events[k] === "exercise-activated"){
-   index = events.indexOf("exercise-activated");
-  }
-}*/
+console.log(annotated);
+}, 60000);*/
 
 
-// Yet to Complete
+
