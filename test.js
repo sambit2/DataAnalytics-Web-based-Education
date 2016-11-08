@@ -11,7 +11,7 @@ var time_seconds = [];
 
 // These variables store the binary state of each user as a string for a certain time interval
 
-var exercise_check = [];
+var exercise_check = "0";
 var exercise = [];
 var connected = [];
 var focus = [];
@@ -81,6 +81,8 @@ function process()
    p++;
   }
 }
+//console.log(users[358871]);
+//console.log(date_index);
 
   for(z = date_index[0]; z < (date_index[0] + date_index.length); z = counter){
    
@@ -88,9 +90,10 @@ function process()
 
    student_counter = 0;
    counter = z;
-   students[0] = users[counter];
+   //counter = 360072;
 
-   while(time_seconds[counter] <= (time_seconds[z] + 10.00)){
+
+   while(time_seconds[counter] <= (time_seconds[z] + 10.000)){
 
       if (student_counter === 0){
       students[student_counter] = users[counter];
@@ -99,7 +102,7 @@ function process()
       if(student_counter > 0){
          for(var m = 0; m < students.length; m++){
             if(users[counter] !== students[m]){
-               if(m === (students.length-1)){
+               if(m === students.length-1){
                      students[student_counter] = users[counter];
                      student_counter++;
                   }
@@ -114,7 +117,8 @@ function process()
 counter++;
    }
 
-   // console.log(students);
+   //console.log(students);
+   //break;
    
    number = [];
    category = [];
@@ -123,10 +127,23 @@ counter++;
 });
 
    IndicatorstoNumbers();
+
+   //console.log(number);
+   //console.log(submitted);
    Categories();
    Annotation(annotation_index);
    annotation_index++;
-   students = [];
+   
+   //students = [];
+   
+
+   /*exercise = [];
+   connected = [];
+   focus = [];
+   idle = [];
+   input = [];
+   submitted = [];*/
+
 }
 
 }
@@ -136,26 +153,43 @@ counter++;
   function EventstoIndicators(index, start, end)
   {
    
-   // Initialize that user is not in an exercise
+   // Initialize the state of a new user to avoid undefined problem 
 
-   exercise[index] = "0";
+   if(idle[index] === undefined){
+    idle[index] = "0";
+   }
+   if(focus[index] === undefined){
+    focus[index] = "0";
+   }
+   if(input[index] === undefined){
+    input[index] = "0";
+   }
+   if(submitted[index] === undefined){
+    submitted[index] = "0";
+   }
+   if(connected[index] === undefined){
+    connected[index] = "0";
+   }
+   if(exercise[index] === undefined){
+    exercise[index] = "0";
+   }
     
     for(var l = start; l <= end; l++){
 
       // To check if an exercise is activated
 
       if(events[l] === "exercise-activated"){
-            exercise_check[index] = "1";
+            exercise_check = "1";
         }
       if(events[l] === "exercise-deactivated"){
-            exercise_check[index] = "0";
+            exercise_check = "0";
         }
       
       if(users[l] === students[index]){
 
          // To check if a user is in exercise
 
-         if(exercise_check[index] === "1"){
+         if(exercise_check === "1"){
             exercise[index] = "1";
          }
 
@@ -163,7 +197,7 @@ counter++;
 
         if(events[l] === "viewer-idle"){
          idle[index] = "1";
-         continue;
+         //continue;
         }
         if(events[l] === "tabhidden" || events[l] === "tabvisible" || events[l] === "windowfocus" || events[l] === "windowblur" || events[l] === "focusin" || events[l] === "focusout" || events[l] === "exercisefocus" || events[l] === "exerciseblur" || events[l] === "input" || events[l] === "questioninput" || events[l] === "exercise-submit" || events[l] === "answer-submitted"){
          idle[index] = "0";
@@ -173,37 +207,37 @@ counter++;
 
       if(events[l] === "folo-connected"){
          connected[index] = "1";
-         continue;
-      } // fix the index value
+         //continue;
+      } 
       if(events[l] === "folo-disconnected"){
          connected[index] = "0";
-         continue;
+         //continue;
       }
 
         // To check for user focus
 
         if(events[l] === "windowfocus" || events[l] === "exercisefocus"){
             focus[index] = "1";
-            continue;
+            //continue;
         }
 
         if(events[l] === "windowblur" || events[l] === "exerciseblur"){
          focus[index] = "0";
-         continue;
+         //continue;
         }
 
         // To check for user input
 
         if(events[l] === "input" || events[l] === "questioninput"){
          input[index] = "1";
-         continue;
+         //continue;
         }
 
         // To check for user submission
 
         if(events[l] === "exercise-submit"){
          submitted[index] = "1";
-         continue;
+         //continue;
         }
       }
     }
@@ -215,6 +249,8 @@ counter++;
   {
    for(var x = 0; x < students.length; x++){
       number[x] = parseInt((submitted[x]+input[x]+idle[x]+focus[x]+connected[x]+exercise[x]),2);
+      //console.log(submitted[x]+input[x]+idle[x]+focus[x]+connected[x]+exercise[x]);
+      //console.log(submitted[x]);
    }
   }
 
@@ -259,16 +295,17 @@ counter++;
          three_counter++;
       }
    }
-   if((one_counter/students.length) >= 0.7){
+   if((one_counter/students.length) >= 0.5){
       annotated[s] = "R";
    }
-   if((one_counter/students.length) >= 0.4 && (one_counter/students.length) < 0.7){
+   if((one_counter/students.length) >= 0.4 && (one_counter/students.length) < 0.5){
       annotated[s] = "Y";
    }
    annotated[s] = "G";
   }
 
-console.log(annotated);
+
+//console.log(annotated);
 
 //Use of settimeout
 
@@ -277,5 +314,4 @@ console.log(annotated);
 console.log(annotated);
 }, 60000);*/
 
-
-
+// Presenter ID is "564c6ecce69d92a4682a99fc"
