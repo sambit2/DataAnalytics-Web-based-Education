@@ -76,24 +76,31 @@ function process()
   
   // Extract the dates to verify
 
-  if(date[k] === "2016-01-04"){
+  if(date[k] === "2015-12-01"){
    date_index[p] = k;
    p++;
   }
 }
-//console.log(users[358871]);
-//console.log(date_index);
 
   for(z = date_index[0]; z < (date_index[0] + date_index.length); z = counter){
    
    // Extract all students using ASQ in that time interval
 
-   student_counter = 0;
+   // Condition helps in accumulating all the students with time
+
+   if(students.length === 0){
+    student_counter = 0;
+   }
+   else{
+    student_counter = students.length;
+   }
    counter = z;
    //counter = 360072;
 
+   // Collection of students for the initial time interval
 
-   while(time_seconds[counter] <= (time_seconds[z] + 10.000)){
+   if(students.length === 0){
+    while(time_seconds[counter] <= (time_seconds[z] + 10.000)){
 
       if (student_counter === 0){
       students[student_counter] = users[counter];
@@ -114,7 +121,29 @@ function process()
          }
       }
 
-counter++;
+ counter++;
+   }
+   }
+   
+   else{
+    
+    // Collection of students after the initial collection
+
+    while(time_seconds[counter] <= (time_seconds[z] + 10.000)){
+      for(var m = 0; m < students.length; m++){
+            if(users[counter] !== students[m]){
+               if(m === students.length-1){
+                     students[student_counter] = users[counter];
+                     student_counter++;
+                  }
+                     continue;
+            }
+            else{
+               break;
+            }    
+         }
+     counter++;
+    }
    }
 
    //console.log(students);
@@ -122,28 +151,25 @@ counter++;
    
    number = [];
    category = [];
+
+   // Generate indicator states from the events for each student
+
    students.forEach(function(item) {
     EventstoIndicators(students.indexOf(item), z, counter);
 });
 
+   // Call the function to generate the deimal numbers from the indicator states for the collection of the students
+
    IndicatorstoNumbers();
 
-   //console.log(number);
-   //console.log(submitted);
+   // Call the function to generate the categories based on the states
+
    Categories();
+
+   // Call the annotation function to annotate the colours as alphabets R, Y and G
+
    Annotation(annotation_index);
    annotation_index++;
-   
-   //students = [];
-   
-
-   /*exercise = [];
-   connected = [];
-   focus = [];
-   idle = [];
-   input = [];
-   submitted = [];*/
-
 }
 
 }
@@ -153,7 +179,7 @@ counter++;
   function EventstoIndicators(index, start, end)
   {
    
-   // Initialize the state of a new user to avoid undefined problem 
+   // Initialize the states of a new user to avoid undefined  array index problem 
 
    if(idle[index] === undefined){
     idle[index] = "0";
@@ -187,19 +213,46 @@ counter++;
       
       if(users[l] === students[index]){
 
-         // To check if a user is in exercise
+        // To check if a user is in exercise
 
-         if(exercise_check === "1"){
-            exercise[index] = "1";
-         }
+        if(exercise_check === "1"){
+
+           exercise[index] = "1";
+
+          // To check for user input and if input then also focus
+
+        if(events[l] === "input" || events[l] === "questioninput"){
+         input[index] = "1";
+         focus[index] = "1";
+        }
+
+        // To check for user submission
+
+        if(events[l] === "exercise-submit"){
+         submitted[index] = "1";
+        }
+        }
+        else{
+           
+           exercise[index] = "0";
+
+           // No user input and submission as no exercise
+
+           input[index] = "0";
+
+           submitted[index] = "0"
+        }
 
          // To check for idle user
 
         if(events[l] === "viewer-idle"){
          idle[index] = "1";
-         //continue;
+
+         // If idle then no input
+
+         input[index] = "0";
         }
-        if(events[l] === "tabhidden" || events[l] === "tabvisible" || events[l] === "windowfocus" || events[l] === "windowblur" || events[l] === "focusin" || events[l] === "focusout" || events[l] === "exercisefocus" || events[l] === "exerciseblur" || events[l] === "input" || events[l] === "questioninput" || events[l] === "exercise-submit" || events[l] === "answer-submitted"){
+        if(events[l] === "tabhidden" || events[l] === "tabvisible" || events[l] === "windowfocus" || events[l] === "windowblur" || events[l] === "focusin" || events[l] === "focusout" || events[l] === "exercisefocus" || events[l] === "exerciseblur" || ((exercise_check === 1) && (events[l] === "input" || events[l] === "questioninput" || events[l] === "exercise-submit" || events[l] === "answer-submitted"))){
          idle[index] = "0";
         }
 
@@ -207,37 +260,30 @@ counter++;
 
       if(events[l] === "folo-connected"){
          connected[index] = "1";
-         //continue;
       } 
+
       if(events[l] === "folo-disconnected"){
          connected[index] = "0";
-         //continue;
+
+         // If disconnected then no focus, idle and input
+
+         focus[index] = "0";
+         idle[index] = "0";
+         input[index] = "0";
       }
 
         // To check for user focus
 
-        if(events[l] === "windowfocus" || events[l] === "exercisefocus"){
+        if(events[l] === "windowfocus" || events[l] === "exercisefocus" || events[l] === "focusin" || events[l] === "tabvisible" || ((exercise_check === 1) && (events[l] === "input" || events[l] === "questioninput"))){
             focus[index] = "1";
-            //continue;
         }
 
-        if(events[l] === "windowblur" || events[l] === "exerciseblur"){
+        if(events[l] === "windowblur" || events[l] === "exerciseblur" || events[l] === "focusout" || events[l] === "tabhidden"){
          focus[index] = "0";
-         //continue;
-        }
 
-        // To check for user input
+         // If no focus then no input
 
-        if(events[l] === "input" || events[l] === "questioninput"){
-         input[index] = "1";
-         //continue;
-        }
-
-        // To check for user submission
-
-        if(events[l] === "exercise-submit"){
-         submitted[index] = "1";
-         //continue;
+         input[index] = "0";
         }
       }
     }
@@ -249,9 +295,9 @@ counter++;
   {
    for(var x = 0; x < students.length; x++){
       number[x] = parseInt((submitted[x]+input[x]+idle[x]+focus[x]+connected[x]+exercise[x]),2);
-      //console.log(submitted[x]+input[x]+idle[x]+focus[x]+connected[x]+exercise[x]);
-      //console.log(submitted[x]);
+      // console.log(submitted[x]+input[x]+idle[x]+focus[x]+connected[x]+exercise[x]);
    }
+   console.log(number);
   }
 
   // Assign students to different categories
@@ -295,6 +341,9 @@ counter++;
          three_counter++;
       }
    }
+
+   // Decide the total number of students using ASQ by replacing the students.length with the actual value for that lecture
+
    if((one_counter/students.length) >= 0.5){
       annotated[s] = "R";
    }
@@ -304,8 +353,7 @@ counter++;
    annotated[s] = "G";
   }
 
-
-//console.log(annotated);
+// Presenter ID is "564c6ecce69d92a4682a99fc"
 
 //Use of settimeout
 
@@ -313,5 +361,3 @@ counter++;
 {
 console.log(annotated);
 }, 60000);*/
-
-// Presenter ID is "564c6ecce69d92a4682a99fc"
