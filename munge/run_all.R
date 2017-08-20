@@ -1,0 +1,8 @@
+source("munge/1_keep_classroom_sessions.R")            
+source("munge/2_renameids_fix_dates.R")                
+source("munge/3_create_answers_with_start_date.R")     
+source("munge/4_add_user_field_to_session_events.R")
+source("munge/5_fix_disconnected_event_for_viewers.R")
+source("munge/6_extract_slides_for_events.R")
+source("munge/7_analysis_sessions.R")
+source("munge/8_fine_tune_answers_start_date.R")
